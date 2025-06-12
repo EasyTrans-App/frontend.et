@@ -76,5 +76,15 @@ services:
       - client-service
       - driver-service
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+   
+
 volumes:
   mysql_data:
