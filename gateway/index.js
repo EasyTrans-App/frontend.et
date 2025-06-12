@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3001', // Puerto del frontend React
+  origin: 'http://localhost:3100', // Puerto del frontend React
   credentials: true
 }));
 
