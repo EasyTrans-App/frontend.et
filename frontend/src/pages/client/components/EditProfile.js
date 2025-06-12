@@ -24,7 +24,7 @@ const EditProfile = () => {
   // Cargar datos del perfil al montar el componente
   useEffect(() => {
     loadUserProfile();
-  }, []);
+  }, [loadUserProfile]);
 
   const loadUserProfile = async () => {
     try {
