@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: easytrans
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  auth-service:
+    build: ./auth-service
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=easytrans
+      - JWT_SECRET=tu_super_secreto_jwt
+      - NODE_ENV=development
+    ports:
+      - "4001:4001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  client-service:
+    build: ./client-service
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=easytrans
+      - JWT_SECRET=tu_super_secreto_jwt
+      - NODE_ENV=development
+    ports:
+      - "4002:4002"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  driver-service:
+    build: ./driver-service
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=easytrans
+      - JWT_SECRET=tu_super_secreto_jwt
+      - NODE_ENV=development
+    ports:
+      - "4003:4003"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  gateway:
+    build: ./gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - JWT_SECRET=tu_super_secreto_jwt
+      - AUTH_SERVICE_URL=http://auth-service:4001
+      - CLIENT_SERVICE_URL=http://client-service:4002
+      - DRIVER_SERVICE_URL=http://driver-service:4003
+    depends_on:
+      - auth-service
+      - client-service
+      - driver-service
+
+volumes:
+  mysql_data:
